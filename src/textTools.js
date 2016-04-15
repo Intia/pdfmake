@@ -71,6 +71,11 @@ TextTools.prototype.buildInlines = function(textArray, styleContextStack) {
 * @return {Object}                   size of the specified string
 */
 TextTools.prototype.sizeOfString = function(text, styleContextStack) {
+	//INTIA
+	if(!text)
+	{
+			text = '';
+	}
 	text = text.replace('\t', '    ');
 
 	//TODO: refactor - extract from measure
@@ -94,6 +99,11 @@ TextTools.prototype.sizeOfString = function(text, styleContextStack) {
 
 function splitWords(text, noWrap) {
 	var results = [];
+	//INTIA
+	if(!text)
+	{
+		text = '';
+	}
 	text = text.replace('\t', '    ');
 
 	var array;
@@ -181,6 +191,11 @@ var diacriticsMap = { 'Ą': 'A', 'Ć': 'C', 'Ę': 'E', 'Ł': 'L', 'Ń': 'N', 'Ó
 // '  << atom.io workaround
 
 function removeDiacritics(text) {
+	//INTIA
+	if(!text)
+	{
+		text = '';
+	}
 	return text.replace(/[^A-Za-z0-9\[\] ]/g, function(a) {
 		return diacriticsMap[a] || a;
 	});
