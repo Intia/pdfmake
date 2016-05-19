@@ -2309,8 +2309,11 @@
 	function renderWatermark(page, pdfKitDoc){
 		var watermark = page.watermark;
 
-		pdfKitDoc.fill('black');
-		pdfKitDoc.opacity(0.6);
+		//pdfKitDoc.fill('black');
+		//pdfKitDoc.opacity(0.6);
+		//Intia Watermark
+		pdfKitDoc.fill(watermark.color);
+		pdfKitDoc.opacity(watermark.opacity);
 
 		pdfKitDoc.save();
 		pdfKitDoc.transform(1, 0, 0, -1, 0, pdfKitDoc.page.height);
@@ -15100,7 +15103,8 @@
 	  this.addHeadersAndFooters(header, footer);
 	  /* jshint eqnull:true */
 	  if(watermark != null)
-	    this.addWatermark(watermark, fontProvider);
+	    //this.addWatermark(watermark, fontProvider);
+	    this.addWatermark(watermark, fontProvider, defaultStyle);	//Intia Watermark https://github.com/bpampuch/pdfmake/pull/492/files
 
 	  return {pages: this.writer.context().pages, linearNodeList: this.linearNodeList};
 	};
@@ -15172,65 +15176,133 @@
 	  }
 	};
 
-	LayoutBuilder.prototype.addWatermark = function(watermark, fontProvider){
-	  //var defaultFont = Object.getOwnPropertyNames(fontProvider.fonts)[0]; // TODO allow selection of other font
-	  //var watermarkObject = {
-	  //  text: watermark,
-	  //  font: fontProvider.provideFont(fontProvider[defaultFont], false, false),
-	  //  size: getSize(this.pageSize, watermark, fontProvider)
-	  //};
+//LayoutBuilder.prototype.addWatermark = function(watermark, fontProvider){
+//	//Intia
+//  //var defaultFont = Object.getOwnPropertyNames(fontProvider.fonts)[0]; // TODO allow selection of other font
+//  //var watermarkObject = {
+//  //  text: watermark,
+//  //  font: fontProvider.provideFont(fontProvider[defaultFont], false, false),
+//	//	size: getSize(this.pageSize, watermark, fontProvider)
+//  //};
+//
+//	var defaultFont = Object.getOwnPropertyNames(fontProvider.fonts)[0]; // TODO allow selection of other font
+//	var watermarkObject = {
+//		text: watermark,
+//		// Intia font: fontProvider.provideFont(fontProvider[defaultFont], false, false),
+//		font: fontProvider.provideFont(defaultFont, false, false),
+//		size: getSize(this.pageSize, watermark, fontProvider)
+//	};
+//
+//
+//  var pages = this.writer.context().pages;
+//  for(var i = 0, l = pages.length; i < l; i++) {
+//    pages[i].watermark = watermarkObject;
+//  }
+//
+//  function getSize(pageSize, watermark, fontProvider){
+//    var width = pageSize.width;
+//    var height = pageSize.height;
+//    var targetWidth = Math.sqrt(width*width + height*height)*0.8; /* page diagnoal * sample factor */
+//    var textTools = new TextTools(fontProvider);
+//    var styleContextStack = new StyleContextStack();
+//    var size;
+//
+//    /**
+//     * Binary search the best font size.
+//     * Initial bounds [0, 1000]
+//     * Break when range < 1
+//     */
+//    var a = 0;
+//    var b = 1000;
+//    var c = (a+b)/2;
+//    while(Math.abs(a - b) > 1){
+//      styleContextStack.push({
+//        fontSize: c
+//      });
+//      size = textTools.sizeOfString(watermark, styleContextStack);
+//      if(size.width > targetWidth){
+//        b = c;
+//        c = (a+b)/2;
+//      }
+//      else if(size.width < targetWidth){
+//        a = c;
+//        c = (a+b)/2;
+//      }
+//      styleContextStack.pop();
+//    }
+//    /*
+//      End binary search
+//     */
+//    return {size: size, fontSize: c};
+//  }
+//};
 
-		//Intia
-		var defaultFont = Object.getOwnPropertyNames(fontProvider.fonts)[0]; // TODO allow selection of other font
-		var watermarkObject = {
-			text: watermark,
-			// Intia font: fontProvider.provideFont(fontProvider[defaultFont], false, false),
-			font: fontProvider.provideFont(defaultFont, false, false),
-			size: getSize(this.pageSize, watermark, fontProvider)
+		//Intia Watermark https://github.com/bpampuch/pdfmake/pull/492/files
+		LayoutBuilder.prototype.addWatermark = function(watermark, fontProvider, defaultStyle) {
+			if (typeof watermark === 'string') {
+				watermark = {'text': watermark};
+			}
+
+			if (!watermark.text) { // empty watermark text
+				return;
+			}
+
+			watermark.font = watermark.font || defaultStyle.font || 'Roboto';
+			watermark.color = watermark.color || 'black';
+			watermark.opacity = watermark.opacity || 0.6;
+			watermark.bold = watermark.bold || false;
+			watermark.italics = watermark.italics || false;
+
+			var watermarkObject = {
+				text: watermark.text,
+				font: fontProvider.provideFont(watermark.font, watermark.bold, watermark.italics),
+				size: getSize(this.pageSize, watermark, fontProvider),
+				color: watermark.color,
+				opacity: watermark.opacity
+			};
+
+			var pages = this.writer.context().pages;
+			for(var i = 0, l = pages.length; i < l; i++) {
+				pages[i].watermark = watermarkObject;
+			}
+
+			function getSize(pageSize, watermark, fontProvider){
+				var width = pageSize.width;
+				var height = pageSize.height;
+				var targetWidth = Math.sqrt(width*width + height*height)*0.8; /* page diagonal * sample factor */
+				var textTools = new TextTools(fontProvider);
+				var styleContextStack = new StyleContextStack(null, {font: watermark.font, bold: watermark.bold, italics: watermark.italics});
+				var size;
+
+				/**
+				 * Binary search the best font size.
+				 * Initial bounds [0, 1000]
+				 * Break when range < 1
+				 */
+				var a = 0;
+				var b = 1000;
+				var c = (a+b)/2;
+				while(Math.abs(a - b) > 1){
+					styleContextStack.push({
+						fontSize: c
+					});
+					size = textTools.sizeOfString(watermark.text, styleContextStack);
+					if(size.width > targetWidth){
+						b = c;
+						c = (a+b)/2;
+					}
+					else if(size.width < targetWidth){
+						a = c;
+						c = (a+b)/2;
+					}
+					styleContextStack.pop();
+				}
+				/*
+				 End binary search
+				 */
+				return {size: size, fontSize: c};
+			}
 		};
-
-	  var pages = this.writer.context().pages;
-	  for(var i = 0, l = pages.length; i < l; i++) {
-	    pages[i].watermark = watermarkObject;
-	  }
-
-	  function getSize(pageSize, watermark, fontProvider){
-	    var width = pageSize.width;
-	    var height = pageSize.height;
-	    var targetWidth = Math.sqrt(width*width + height*height)*0.8; /* page diagnoal * sample factor */
-	    var textTools = new TextTools(fontProvider);
-	    var styleContextStack = new StyleContextStack();
-	    var size;
-
-	    /**
-	     * Binary search the best font size.
-	     * Initial bounds [0, 1000]
-	     * Break when range < 1
-	     */
-	    var a = 0;
-	    var b = 1000;
-	    var c = (a+b)/2;
-	    while(Math.abs(a - b) > 1){
-	      styleContextStack.push({
-	        fontSize: c
-	      });
-	      size = textTools.sizeOfString(watermark, styleContextStack);
-	      if(size.width > targetWidth){
-	        b = c;
-	        c = (a+b)/2;
-	      }
-	      else if(size.width < targetWidth){
-	        a = c;
-	        c = (a+b)/2;
-	      }
-	      styleContextStack.pop();
-	    }
-	    /*
-	      End binary search
-	     */
-	    return {size: size, fontSize: c};
-	  }
-	};
 
 	function decorateNode(node){
 	  var x = node.x, y = node.y;

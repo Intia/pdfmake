@@ -91,7 +91,7 @@ PdfPrinter.prototype.createPdfKitDocument = function(docDefinition, options) {
 	this.pdfKitDoc = new PdfKit({ size: [ pageSize.width, pageSize.height ], compress: false});
 	this.pdfKitDoc.info.Producer = 'pdfmake';
 	this.pdfKitDoc.info.Creator = 'pdfmake';
-	
+
 	// pdf kit maintains the uppercase fieldnames from pdf spec
 	// to keep the pdfmake api consistent, the info field are defined lowercase
 	if(docDefinition.info){
@@ -102,7 +102,7 @@ PdfPrinter.prototype.createPdfKitDocument = function(docDefinition, options) {
 		this.pdfKitDoc.info.Subject = docDefinition.info.subject ? docDefinition.info.subject : null;
 		this.pdfKitDoc.info.Keywords = docDefinition.info.keywords ? docDefinition.info.keywords : null;
 	}
-	
+
 	this.fontProvider = new FontProvider(this.fontDescriptors, this.pdfKitDoc);
 
   docDefinition.images = docDefinition.images || {};
@@ -299,8 +299,11 @@ function renderLine(line, x, y, pdfKitDoc) {
 function renderWatermark(page, pdfKitDoc){
 	var watermark = page.watermark;
 
-	pdfKitDoc.fill('black');
-	pdfKitDoc.opacity(0.6);
+	//pdfKitDoc.fill('black');
+	//pdfKitDoc.opacity(0.6);
+	//Intia Watermark
+	pdfKitDoc.fill(watermark.color);
+	pdfKitDoc.opacity(watermark.opacity);
 
 	pdfKitDoc.save();
 	pdfKitDoc.transform(1, 0, 0, -1, 0, pdfKitDoc.page.height);
