@@ -1,5 +1,6 @@
+'use strict';
+
 var assert = require('assert');
-var _ = require('lodash');
 var sizes = require('../../src/standardPageSizes');
 
 var integrationTestHelper = require('./integrationTestHelper');
@@ -18,8 +19,8 @@ describe('Integration test: basics', function () {
 
 		assert.equal(pages.length, 1);
 		assert.equal(pages[0].items.length, 4);
-		assert.deepEqual(_.map(_.map(pages[0].items, 'item'), 'x'), [testHelper.MARGINS.left, testHelper.MARGINS.left, testHelper.MARGINS.left, testHelper.MARGINS.left]);
-		assert.deepEqual(_.map(_.map(pages[0].items, 'item'), 'y'), [testHelper.MARGINS.top, testHelper.MARGINS.top + testHelper.LINE_HEIGHT, testHelper.MARGINS.top + 2 * testHelper.LINE_HEIGHT, testHelper.MARGINS.top + 3 * testHelper.LINE_HEIGHT]);
+		assert.deepEqual(pages[0].items.map(node => node.item).map(item => item.x), [testHelper.MARGINS.left, testHelper.MARGINS.left, testHelper.MARGINS.left, testHelper.MARGINS.left]);
+		assert.deepEqual(pages[0].items.map(node => node.item).map(item => item.y), [testHelper.MARGINS.top, testHelper.MARGINS.top + testHelper.LINE_HEIGHT, testHelper.MARGINS.top + 2 * testHelper.LINE_HEIGHT, testHelper.MARGINS.top + 3 * testHelper.LINE_HEIGHT]);
 		assert.deepEqual(testHelper.getInlineTexts(pages, {page: 0, item: 0}), ['First ', 'paragraph']);
 		assert.deepEqual(testHelper.getInlineTexts(pages, {page: 0, item: 1}), ['Second ', 'paragraph ', 'on ']);
 		assert.deepEqual(testHelper.getInlineTexts(pages, {page: 0, item: 2}), ['three ', 'lines ', 'because ', 'it ', 'is ']);
@@ -54,7 +55,7 @@ describe('Integration test: basics', function () {
 		assert.equal(pages[0].items[2].item.y.toFixed(3), testHelper.MARGINS.top + customMargin * 4 + anotherCustomMargin + testHelper.LINE_HEIGHT * 2);
 
 		assert.equal(pages[0].items[3].item.x, sizes.A5[0] - testHelper.MARGINS.right - 20 - testHelper.getWidthOfString('has only right margin'));
-		assert.equal(pages[0].items[3].item.y.toFixed(3), testHelper.MARGINS.top + customMargin * 4 + anotherCustomMargin * 2 + testHelper.LINE_HEIGHT * 3);
+		assert.equal(pages[0].items[3].item.y.toFixed(3), (testHelper.MARGINS.top + customMargin * 4 + anotherCustomMargin * 2 + testHelper.LINE_HEIGHT * 3).toFixed(3));
 	});
 
 });
