@@ -73,6 +73,7 @@ TextTools.prototype.buildInlines = function (textArray, styleContextStack) {
  * @return {Object}                   size of the specified string
  */
 TextTools.prototype.sizeOfString = function (text, styleContextStack) {
+	//INTIA
 	text = text ? text.toString().replace(/\t/g, '    ') : '';
 
 	//TODO: refactor - extract from measure
@@ -102,7 +103,7 @@ TextTools.prototype.widthOfString = function (text, font, fontSize, characterSpa
 
 function splitWords(text, noWrap) {
 	var results = [];
-	text = text.replace(/\t/g, '    ');
+	text = text ? text.replace(/\t/g, '    ') : '';
 
 	if (noWrap) {
 		results.push({text: text});
